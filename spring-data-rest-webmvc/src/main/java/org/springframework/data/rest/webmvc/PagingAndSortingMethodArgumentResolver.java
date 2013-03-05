@@ -1,10 +1,5 @@
 package org.springframework.data.rest.webmvc;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +12,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * {@link HandlerMethodArgumentResolver} implementation responsible for inspecting a request for page and sort
  * parameters for use by the repositories.
@@ -26,9 +26,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class PagingAndSortingMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
   private static final int DEFAULT_PAGE = 1; // We're 1-based, not 0-based
-
-  @Autowired(required = false)
-  private RepositoryRestConfiguration config = RepositoryRestConfiguration.DEFAULT;
+  @Autowired
+  private RepositoryRestConfiguration config;
 
   @Override public boolean supportsParameter(MethodParameter parameter) {
     return ClassUtils.isAssignable(parameter.getParameterType(), PagingAndSorting.class);
@@ -62,7 +61,7 @@ public class PagingAndSortingMethodArgumentResolver implements HandlerMethodArgu
       String sLimit = request.getParameter(config.getLimitParamName());
       if(StringUtils.hasText(sLimit)) {
         try {
-          limit = Integer.parseInt(sLimit);
+          limit = Math.min(Integer.parseInt(sLimit), config.getMaxPageSize());
         } catch(NumberFormatException ignored) {
         }
       }
