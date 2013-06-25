@@ -1,11 +1,5 @@
 package org.springframework.data.rest.repository.context;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.springframework.beans.BeansException;
@@ -17,14 +11,22 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.data.rest.repository.annotation.HandleAfterDelete;
+import org.springframework.data.rest.repository.annotation.HandleAfterFind;
 import org.springframework.data.rest.repository.annotation.HandleAfterLinkSave;
 import org.springframework.data.rest.repository.annotation.HandleAfterSave;
 import org.springframework.data.rest.repository.annotation.HandleBeforeDelete;
+import org.springframework.data.rest.repository.annotation.HandleBeforeFind;
 import org.springframework.data.rest.repository.annotation.HandleBeforeLinkSave;
 import org.springframework.data.rest.repository.annotation.HandleBeforeSave;
 import org.springframework.data.rest.repository.annotation.RepositoryEventHandler;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link ApplicationListener} that will dispatch {@link RepositoryEvent}s to handlers annotated with {@link
@@ -114,8 +116,10 @@ public class AnnotatedHandlerRepositoryEventListener implements ApplicationListe
               new ReflectionUtils.MethodCallback() {
                 @Override public void doWith(Method method)
                     throws IllegalArgumentException, IllegalAccessException {
+                  inspect(targetType, handler, method, HandleBeforeFind.class, BeforeFindEvent.class);
                   inspect(targetType, handler, method, HandleBeforeSave.class, BeforeSaveEvent.class);
                   inspect(targetType, handler, method, HandleAfterSave.class, AfterSaveEvent.class);
+                  inspect(targetType, handler, method, HandleAfterFind.class, AfterFindEvent.class);
                   inspect(targetType, handler, method, HandleBeforeLinkSave.class, BeforeLinkSaveEvent.class);
                   inspect(targetType, handler, method, HandleAfterLinkSave.class, AfterLinkSaveEvent.class);
                   inspect(targetType, handler, method, HandleBeforeDelete.class, BeforeDeleteEvent.class);

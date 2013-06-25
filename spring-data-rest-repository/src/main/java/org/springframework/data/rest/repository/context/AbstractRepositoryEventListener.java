@@ -1,7 +1,5 @@
 package org.springframework.data.rest.repository.context;
 
-import java.util.List;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -9,6 +7,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.rest.repository.RepositoryExporter;
 import org.springframework.data.rest.repository.RepositoryExporterSupport;
+
+import java.util.List;
 
 /**
  * Abstract class that listens for generic {@link RepositoryEvent}s and dispatches them to a specific
@@ -34,7 +34,11 @@ public abstract class AbstractRepositoryEventListener<T extends AbstractReposito
   }
 
   @Override public final void onApplicationEvent(RepositoryEvent event) {
-    if(event instanceof BeforeSaveEvent) {
+    if(event instanceof BeforeFindEvent) {
+      onBeforeFind(event.getSource());
+    } else if(event instanceof AfterFindEvent) {
+      onAfterFind(event.getSource());
+    } else if (event instanceof BeforeSaveEvent) {
       onBeforeSave(event.getSource());
     } else if(event instanceof AfterSaveEvent) {
       onAfterSave(event.getSource());
@@ -52,6 +56,23 @@ public abstract class AbstractRepositoryEventListener<T extends AbstractReposito
       onAfterDelete(event.getSource());
     }
   }
+
+  /**
+   * Override this method if you are interested in {@literal beforeFind} events.
+   *
+   * @param entity
+   */
+  protected void onBeforeFind(Object entity){
+  }
+
+  /**
+   * Override this method if you are interested in {@literal beforeFind} events.
+   *
+   * @param entity
+   */
+  protected void onAfterFind(Object entity){
+  }
+
 
   /**
    * Override this method if you are interested in {@literal beforeSave} events.

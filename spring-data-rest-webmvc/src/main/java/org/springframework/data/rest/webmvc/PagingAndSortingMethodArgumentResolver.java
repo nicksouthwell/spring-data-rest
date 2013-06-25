@@ -26,10 +26,11 @@ import java.util.List;
 public class PagingAndSortingMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
   private static final int DEFAULT_PAGE = 1; // We're 1-based, not 0-based
-    @Autowired(required = false)
-    private RepositoryRestConfiguration config = RepositoryRestConfiguration.DEFAULT;
 
-    @Override public boolean supportsParameter(MethodParameter parameter) {
+  @Autowired(required = false)
+  private RepositoryRestConfiguration config = RepositoryRestConfiguration.DEFAULT;
+
+  @Override public boolean supportsParameter(MethodParameter parameter) {
     return ClassUtils.isAssignable(parameter.getParameterType(), PagingAndSorting.class);
   }
 
@@ -61,7 +62,7 @@ public class PagingAndSortingMethodArgumentResolver implements HandlerMethodArgu
       String sLimit = request.getParameter(config.getLimitParamName());
       if(StringUtils.hasText(sLimit)) {
         try {
-          limit = Math.min(Integer.parseInt(sLimit), config.getMaxPageSize());
+          limit = Integer.parseInt(sLimit);
         } catch(NumberFormatException ignored) {
         }
       }

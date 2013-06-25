@@ -58,10 +58,12 @@ import org.springframework.data.rest.repository.RepositoryNotFoundException;
 import org.springframework.data.rest.repository.UriToDomainObjectUriResolver;
 import org.springframework.data.rest.repository.annotation.RestResource;
 import org.springframework.data.rest.repository.context.AfterDeleteEvent;
+import org.springframework.data.rest.repository.context.AfterFindEvent;
 import org.springframework.data.rest.repository.context.AfterLinkDeleteEvent;
 import org.springframework.data.rest.repository.context.AfterLinkSaveEvent;
 import org.springframework.data.rest.repository.context.AfterSaveEvent;
 import org.springframework.data.rest.repository.context.BeforeDeleteEvent;
+import org.springframework.data.rest.repository.context.BeforeFindEvent;
 import org.springframework.data.rest.repository.context.BeforeLinkDeleteEvent;
 import org.springframework.data.rest.repository.context.BeforeLinkSaveEvent;
 import org.springframework.data.rest.repository.context.BeforeSaveEvent;
@@ -601,11 +603,12 @@ public class RepositoryRestController
                                                (Class<Serializable>)paramRepoMeta.entityMetadata()
                                                                                  .idAttribute()
                                                                                  .type());
+        publishEvent(new BeforeFindEvent(id));
         Object o = paramRepoMeta.repository().findOne(id);
         if(null == o) {
           return notFoundResponse(request);
         }
-
+        publishEvent(new AfterFindEvent(o));
         paramVals[i] = o;
       } else if(String.class.isAssignableFrom(paramTypes[i])) {
         // Param type is a String
@@ -797,10 +800,12 @@ public class RepositoryRestController
                                                                                      .idAttribute()
                                                                                      .type());
     CrudRepository repo = repoMeta.repository();
+    publishEvent(new BeforeFindEvent(serId));
     Object entity = repo.findOne(serId);
     if(null == entity) {
       return notFoundResponse(request);
     }
+    publishEvent(new AfterFindEvent(entity));
 
     HttpHeaders headers = new HttpHeaders();
     if(null != repoMeta.entityMetadata().versionAttribute()) {
@@ -992,10 +997,12 @@ public class RepositoryRestController
                                                                                      .type());
     CrudRepository repo = repoMeta.repository();
 
+    publishEvent(new BeforeFindEvent(serId));
     Object entity;
     if(null == (entity = repo.findOne(serId))) {
       return notFoundResponse(request);
     }
+    publishEvent(new AfterFindEvent(entity));
 
     AttributeMetadata attrMeta;
     if(null == (attrMeta = repoMeta.entityMetadata().attribute(property))) {
@@ -1359,6 +1366,7 @@ public class RepositoryRestController
     if(null == (linkedEntity = linkedRepo.findOne(sChildId))) {
       return notFoundResponse(request);
     }
+    publishEvent(new AfterFindEvent(linkedEntity));
 
     String propertyRel = repository + "." + repoMeta.entityMetadata().type().getSimpleName() + "." + property;
     URI propertyPath = buildUri(baseUri, repository, id, property, linkedId);
